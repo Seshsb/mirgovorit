@@ -4,24 +4,32 @@ services:
   web:
     image: python:3.12
     container_name: django-cookbook-app
-    command: bash -c "pip install -r requirements.txt && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    logging:
+      driver: json-file
+    command: bash -c "pip install -r requirements.txt && python manage.py migrate && python manage.py runserver 0.0.0.0:8787"
     volumes:
       - .:/app
     ports:
-      - "8000:8000"
+      - "8787:8787"
     depends_on:
       - db
     env_file:
       - ./mirgovorit/.env
+    working_dir: /app
 
   # PostgreSQL database
   db:
     image: postgres:latest
+    logging:
+      driver: json-file
     container_name: cookbook-db
     env_file:
       - ./mirgovorit/.env
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
 
 volumes:
   postgres_data:
